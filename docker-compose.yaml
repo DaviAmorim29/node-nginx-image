@@ -5,7 +5,6 @@ services:
     image: postgres:latest
     volumes:
       - ./db:/var/lib/postgresql/data
-    tty: true
     container_name: dbqsl_desafio
     ports:
       - "6552:5432"
@@ -21,13 +20,14 @@ services:
   reverse-proxy:
     build: 
       context: nginx
-      # dockerfile: Dockerfile
     container_name: nginx_desafio
     ports:
       - "8080:80"
     restart: always
     networks:
       - nodenet
+    # depends_on:
+      # - app
   app: 
     build:
       context: node
@@ -41,7 +41,6 @@ services:
     restart: always
     depends_on:
       - db
-      - reverse-proxy
       
 networks: 
   nodenet: 
