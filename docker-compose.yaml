@@ -1,0 +1,48 @@
+version: '3'
+
+services: 
+  db:
+    image: postgres:latest
+    volumes:
+      - ./db:/var/lib/postgresql/data
+    tty: true
+    container_name: dbqsl_desafio
+    ports:
+      - "6552:5432"
+    environment:
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_USER: postgres
+      POSTGRES_DB: mydb
+      POSTGRES_PORT: 5432
+    restart: always
+    networks:
+      - nodenet
+
+  reverse-proxy:
+    build: 
+      context: nginx
+      # dockerfile: Dockerfile
+    container_name: nginx_desafio
+    ports:
+      - "8080:80"
+    restart: always
+    networks:
+      - nodenet
+  app: 
+    build:
+      context: node
+    container_name: node_desafio
+    entrypoint: dockerize -wait tcp://db:5432 -timeout 60s node server.js
+    volumes: 
+      - ./node:/app
+    networks:
+      - nodenet
+    tty: true
+    restart: always
+    depends_on:
+      - db
+      - reverse-proxy
+      
+networks: 
+  nodenet: 
+    driver: bridge
